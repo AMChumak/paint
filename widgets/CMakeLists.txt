@@ -12,10 +12,7 @@ file(GLOB_RECURSE SOURCES src/*.cpp)
 file(GLOB_RECURSE HEADERS include/*.h)
 
 find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets Gui)
-qt_add_library(${LIB_NAME} STATIC ${SOURCES} ${HEADERS})
-
-qt_add_resources(QRC_FILES resources.qrc)
-target_sources(${LIB_NAME} PRIVATE ${QRC_FILES})
+qt_add_library(${LIB_NAME} STATIC ${SOURCES} ${HEADERS} resources.qrc)
 
 target_include_directories(${LIB_NAME}
         PUBLIC

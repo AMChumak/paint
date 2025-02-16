@@ -18,7 +18,7 @@ void MainWindow::open() {}
 void MainWindow::save() {}
 void MainWindow::undo() {}
 void MainWindow::redo() {}
-void MainWindow::clear() {}
+void MainWindow::clean() {}
 void MainWindow::resize() {}
 void MainWindow::setPen() {}
 void MainWindow::insert() {}
@@ -48,36 +48,42 @@ void MainWindow::createActions()
 {
     newFileAct = new QAction("New", this);
     newFileAct->setStatusTip("Create a new file");
-    newFileAct->setIcon(style()->standardIcon(QStyle::SP_FileIcon));
+    newFileAct->setIcon(QIcon(":/resources/new_file.png"));
     connect(newFileAct, SIGNAL(triggered()), this, SLOT(newFile()));
 
     openAct = new QAction("Open", this);
     openAct->setStatusTip("Open a file");
-    openAct->setIcon(style()->standardIcon(QStyle::SP_DirOpenIcon));
+    openAct->setIcon(QIcon(":/resources/open.png"));
     connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
 
     saveAct = new QAction("Save", this);
     saveAct->setStatusTip("Save the file");
+    saveAct->setIcon(QIcon(":/resources/save.png"));
     connect(saveAct, SIGNAL(triggered()), this, SLOT(save()));
 
     undoAct = new QAction("Undo", this);
     undoAct->setStatusTip("Undo the last action");
+    undoAct->setIcon(QIcon(":/resources/undo.png"));
     connect(undoAct, SIGNAL(triggered()), this, SLOT(undo()));
 
     redoAct = new QAction("Redo", this);
     redoAct->setStatusTip("Redo the next action");
+    redoAct->setIcon(QIcon(":/resources/redo.png"));
     connect(redoAct, SIGNAL(triggered()), this, SLOT(redo()));
 
-    clearAct = new QAction("Clear", this);
-    clearAct->setStatusTip("Clear the screen");
-    connect(clearAct, SIGNAL(triggered()), this, SLOT(clear()));
+    cleanAct = new QAction("clean", this);
+    cleanAct->setStatusTip("clean the screen");
+    cleanAct->setIcon(QIcon(":/resources/clean.png"));
+    connect(cleanAct, SIGNAL(triggered()), this, SLOT(clean()));
 
     resizeAct = new QAction("Resize", this);
     resizeAct->setStatusTip("Resize the canvas");
+    resizeAct->setIcon(QIcon(":/resources/resize.png"));
     connect(resizeAct, SIGNAL(triggered()), this, SLOT(resize()));
 
     setPenAct = new QAction("Set Pen", this);
     setPenAct->setStatusTip("Set pen parameters");
+    setPenAct->setIcon(QIcon(":/resources/set_pen.png"));
     connect(setPenAct, SIGNAL(triggered()), this, SLOT(setPen()));
 
     insertAct = new QAction("Insert", this);
@@ -86,10 +92,12 @@ void MainWindow::createActions()
 
     lineAct = new QAction("Line", this);
     lineAct->setStatusTip("Choose line tool");
+    lineAct->setIcon(QIcon(":/resources/line.png"));
     connect(lineAct, SIGNAL(triggered()), this, SLOT(line()));
 
     fillAct = new QAction("Fill", this);
     fillAct->setStatusTip("Choose fill tool");
+    fillAct->setIcon(QIcon(":/resources/fill.png"));
     connect(fillAct, SIGNAL(triggered()), this, SLOT(fill()));
 
     insert4PolygonAct = new QAction("Square", this);
@@ -134,39 +142,47 @@ void MainWindow::createActions()
 
     setKcolorAct = new QAction("Black", this);
     setKcolorAct->setStatusTip("Choose the black color");
+    setKcolorAct->setIcon(QIcon(":/resources/set_k_color.png"));
     connect(setKcolorAct, SIGNAL(triggered()), this, SLOT(setKcolor()));
 
     setRcolorAct = new QAction("Red", this);
     setRcolorAct->setStatusTip("Choose the red color");
+    setRcolorAct->setIcon(QIcon(":/resources/set_r_color.png"));
     connect(setRcolorAct, SIGNAL(triggered()), this, SLOT(setRcolor()));
 
     setRGcolorAct = new QAction("Yellow", this);
     setRGcolorAct->setStatusTip("Choose the yellow color");
+    setRGcolorAct->setIcon(QIcon(":/resources/set_rg_color.png"));
     connect(setRGcolorAct, SIGNAL(triggered()), this, SLOT(setRGcolor()));
 
     setGcolorAct = new QAction("Green", this);
     setGcolorAct->setStatusTip("Choose the green color");
+    setGcolorAct->setIcon(QIcon(":/resources/set_g_color.png"));
     connect(setGcolorAct, SIGNAL(triggered()), this, SLOT(setGcolor()));
 
     setGBcolorAct = new QAction("Cyan", this);
     setGBcolorAct->setStatusTip("Choose the cyan color");
+    setGBcolorAct->setIcon(QIcon(":/resources/set_gb_color.png"));
     connect(setGBcolorAct, SIGNAL(triggered()), this, SLOT(setGBcolor()));
 
     setBcolorAct = new QAction("Blue", this);
     setBcolorAct->setStatusTip("Choose the blue color");
+    setBcolorAct->setIcon(QIcon(":/resources/set_b_color.png"));
     connect(setBcolorAct, SIGNAL(triggered()), this, SLOT(setBcolor()));
 
     setBRcolorAct = new QAction("Magenta", this);
     setBRcolorAct->setStatusTip("Choose the magenta color");
+    setBRcolorAct->setIcon(QIcon(":/resources/set_br_color.png"));
     connect(setBRcolorAct, SIGNAL(triggered()), this, SLOT(setBRcolor()));
 
     setWcolorAct = new QAction("White", this);
     setWcolorAct->setStatusTip("Choose the white color");
+    setWcolorAct->setIcon(QIcon(":/resources/set_w_color.png"));
     connect(setWcolorAct, SIGNAL(triggered()), this, SLOT(setWcolor()));
 
     aboutAct = new QAction("About", this);
     aboutAct->setStatusTip("About the application");
-    aboutAct->setIcon(style()->standardIcon(QStyle::SP_FileDialogInfoView));
+    aboutAct->setIcon(QIcon(":/resources/about.png"));
     connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
 
 
@@ -184,7 +200,7 @@ void MainWindow::createMenus()
     editMenu->setToolTipsVisible(true);
     editMenu->addAction(undoAct);
     editMenu->addAction(redoAct);
-    editMenu->addAction(clearAct);
+    editMenu->addAction(cleanAct);
     editMenu->addAction(resizeAct);
     editMenu->addAction(setPenAct);
     editMenu->addAction(lineAct);
@@ -205,7 +221,7 @@ void MainWindow::createToolBar()
     mainToolBar->addAction(setPenAct);
     mainToolBar->addAction(lineAct);
     mainToolBar->addAction(fillAct);
-    mainToolBar->addAction(clearAct);
+    mainToolBar->addAction(cleanAct);
     mainToolBar->addSeparator();
     mainToolBar->addAction(insert4PolygonAct);
     mainToolBar->addAction(insert5PolygonAct);

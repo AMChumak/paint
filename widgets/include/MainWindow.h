@@ -26,7 +26,7 @@ private slots:
     void save();
     void undo();
     void redo();
-    void clear();
+    void clean();
     void resize();
     void setPen();
     void insert();
@@ -66,7 +66,7 @@ private:
     QAction *saveAct;
     QAction *undoAct;
     QAction *redoAct;
-    QAction *clearAct;
+    QAction *cleanAct;
     QAction *resizeAct;
     QAction *setPenAct;
     QAction *insertAct;

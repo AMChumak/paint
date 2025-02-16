@@ -1,3 +1,23 @@
 <RCC>
-
+    <qresource prefix="/">
+        <file>resources/new_file.png</file>
+        <file>resources/open.png</file>
+        <file>resources/save.png</file>
+        <file>resources/undo.png</file>
+        <file>resources/redo.png</file>
+        <file>resources/clean.png</file>
+        <file>resources/set_pen.png</file>
+        <file>resources/line.png</file>
+        <file>resources/fill.png</file>
+        <file>resources/resize.png</file>
+        <file>resources/set_k_color.png</file>
+        <file>resources/set_r_color.png</file>
+        <file>resources/set_rg_color.png</file>
+        <file>resources/set_g_color.png</file>
+        <file>resources/set_gb_color.png</file>
+        <file>resources/set_b_color.png</file>
+        <file>resources/set_br_color.png</file>
+        <file>resources/set_w_color.png</file>
+        <file>resources/about.png</file>
+    </qresource>
 </RCC>
