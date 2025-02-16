@@ -10,6 +10,16 @@
         <file>resources/line.png</file>
         <file>resources/fill.png</file>
         <file>resources/resize.png</file>
+        <file>resources/square.png</file>
+        <file>resources/pentagon.png</file>
+        <file>resources/hexagon.png</file>
+        <file>resources/heptagon.png</file>
+        <file>resources/octagon.png</file>
+        <file>resources/square_star.png</file>
+        <file>resources/pentagonal_star.png</file>
+        <file>resources/hexagonal_star.png</file>
+        <file>resources/heptagonal_star.png</file>
+        <file>resources/octagonal_star.png</file>
         <file>resources/set_k_color.png</file>
         <file>resources/set_r_color.png</file>
         <file>resources/set_rg_color.png</file>

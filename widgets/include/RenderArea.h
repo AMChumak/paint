@@ -13,7 +13,16 @@ public:
     QSize minimumSizeHint() const override;
     QSize sizeHint() const override;
 
+    QPoint getLastPressed() const;
+    QPoint getCurrentPressed() const;
+
+signals:
+    void mousePressed(const QPoint &pos);
+    void mouseMoved(const QPoint &pos);
+
 public slots:
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
     void resizeImage(const QSize &size);
     void setColor(const QColor &color);
     void setPenWidth(const int &width);
@@ -24,7 +33,7 @@ public slots:
     void make_screenshot();
     void undo();
     void redo();
-
+    void clean();
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -35,7 +44,6 @@ private:
     std::vector<QImage> m_screenshots;
     int opened_step_index = 0;
     int screenshots_limit = 10;
-
-private:
-    QPainter m_painter;
+    std::vector<QPoint> mouse_points;
+    int mouse_points_limit = 2;
 };

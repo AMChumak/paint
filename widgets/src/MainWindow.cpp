@@ -1,48 +1,209 @@
 #include "MainWindow.h"
-
+#include <QAction>
+#include <QStyle>
+#include <QMenu>
+#include <QMenuBar>
+#include <QResizeEvent>
+#include <QFrame>
+#include <QResizeEvent>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
+    scrollArea = new QScrollArea(this);
+    renderArea = new RenderArea(this);
+    scrollArea->resize(1200, 1200);
+    scrollArea->setWidget(renderArea);
+    scrollArea->move(0, menuBar()->height());
+
+    connect(renderArea, &RenderArea::mousePressed, this, &MainWindow::onCanvasPressed);
+    connect(renderArea, &RenderArea::mouseMoved, this, &MainWindow::onMouseMovedOverCanvas);
+
     createActions();
     createMenus();
     createToolBar();
-
     setWindowTitle("AMC Paint");
     setMinimumSize(640, 480);
 }
 
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    scrollArea->resize(event->size().width(), event->size().height());
+    update();
+    QMainWindow::resizeEvent(event);
+}
 
 void MainWindow::newFile() {}
 void MainWindow::open() {}
 void MainWindow::save() {}
-void MainWindow::undo() {}
-void MainWindow::redo() {}
-void MainWindow::clean() {}
-void MainWindow::resize() {}
+void MainWindow::undo()
+{
+    renderArea->undo();
+}
+void MainWindow::redo()
+{
+    renderArea->redo();
+}
+void MainWindow::clean()
+{
+    renderArea->clean();
+}
+void MainWindow::resize()
+{}
 void MainWindow::setPen() {}
 void MainWindow::insert() {}
-void MainWindow::line() {}
-void MainWindow::fill() {}
-void MainWindow::insert4Polygon() {}
-void MainWindow::insert5Polygon() {}
-void MainWindow::insert6Polygon() {}
-void MainWindow::insert7Polygon() {}
-void MainWindow::insert8Polygon() {}
-void MainWindow::insert4Star() {}
-void MainWindow::insert5Star() {}
-void MainWindow::insert6Star() {}
-void MainWindow::insert7Star() {}
-void MainWindow::insert8Star() {}
-void MainWindow::setKcolor() {}
-void MainWindow::setRcolor() {}
-void MainWindow::setRGcolor() {}
-void MainWindow::setGcolor() {}
-void MainWindow::setGBcolor() {}
-void MainWindow::setBcolor() {}
-void MainWindow::setBRcolor() {}
-void MainWindow::setWcolor() {}
+void MainWindow::line()
+{
+    clickCount = 0;
+    currentMode = MODE_LINE;
+}
+void MainWindow::fill()
+{
+    clickCount = 0;
+    currentMode = MODE_FILL;
+}
+void MainWindow::insert4Polygon()
+{
+    clickCount = 0;
+    currentMode = MODE_POLYGON;
+    currentVerticesCount = 4;
+}
+void MainWindow::insert5Polygon()
+{
+    clickCount = 0;
+    currentMode = MODE_POLYGON;
+    currentVerticesCount = 5;
+}
+void MainWindow::insert6Polygon()
+{
+    clickCount = 0;
+    currentMode = MODE_POLYGON;
+    currentVerticesCount = 6;
+}
+void MainWindow::insert7Polygon()
+{
+    clickCount = 0;
+    currentMode = MODE_POLYGON;
+    currentVerticesCount = 7;
+}
+void MainWindow::insert8Polygon()
+{
+    clickCount = 0;
+    currentMode = MODE_POLYGON;
+    currentVerticesCount = 8;
+}
+void MainWindow::insert4Star()
+{
+    clickCount = 0;
+    currentMode = MODE_STAR;
+    currentVerticesCount = 4;
+}
+void MainWindow::insert5Star()
+{
+    clickCount = 0;
+    currentMode = MODE_STAR;
+    currentVerticesCount = 5;
+}
+void MainWindow::insert6Star()
+{
+    clickCount = 0;
+    currentMode = MODE_STAR;
+    currentVerticesCount = 6;
+}
+void MainWindow::insert7Star()
+{
+    clickCount = 0;
+    currentMode = MODE_STAR;
+    currentVerticesCount = 7;
+}
+void MainWindow::insert8Star()
+{
+    clickCount = 0;
+    currentMode = MODE_STAR;
+    currentVerticesCount = 8;
+}
+void MainWindow::setKcolor()
+{
+    renderArea->setColor(Qt::black);
+}
+void MainWindow::setRcolor() {
+    renderArea->setColor(Qt::red);
+}
+void MainWindow::setRGcolor()
+{
+    renderArea->setColor(Qt::yellow);
+}
+void MainWindow::setGcolor()
+{
+    renderArea->setColor(Qt::green);
+}
+void MainWindow::setGBcolor()
+{
+    renderArea->setColor(Qt::cyan);
+}
+void MainWindow::setBcolor()
+{
+    renderArea->setColor(Qt::blue);
+}
+void MainWindow::setBRcolor()
+{
+    renderArea->setColor(Qt::magenta);
+}
+void MainWindow::setWcolor()
+{
+    renderArea->setColor(Qt::white);
+}
 void MainWindow::about() {}
+
+void MainWindow::onCanvasPressed(const QPoint &point)
+{
+    clickCount++;
+    switch (currentMode) {
+        case MODE_FILL: {
+            if (clickCount == 1) {
+                renderArea->fillArea(point);
+                renderArea->make_screenshot();
+                clickCount = 0;
+            }
+            break;
+        }
+        default: {
+            if (clickCount == 2) {
+                renderArea->make_screenshot();
+                clickCount = 0;
+            }
+            break;
+        }
+    }
+}
+void MainWindow::onMouseMovedOverCanvas(const QPoint &point)
+{
+    switch (currentMode) {
+        case MODE_LINE: {
+            if (clickCount == 1) {
+                QPoint begin = renderArea->getCurrentPressed();
+                renderArea->drawLine(begin, point);
+            }
+            break;
+        }
+        case MODE_POLYGON: {
+            if (clickCount == 1) {
+                QPoint center = renderArea->getCurrentPressed();
+                renderArea->drawPolygon(center, point,currentVerticesCount);
+            }
+            break;
+        }
+        case MODE_STAR: {
+            if (clickCount == 1) {
+                QPoint center = renderArea->getCurrentPressed();
+                renderArea->drawStar(center, point,currentVerticesCount);
+            }
+            break;
+        }
+    default:
+        break;
+    }
+}
 
 void MainWindow::createActions()
 {
@@ -63,11 +224,13 @@ void MainWindow::createActions()
 
     undoAct = new QAction("Undo", this);
     undoAct->setStatusTip("Undo the last action");
+    undoAct->setShortcuts(QKeySequence::Undo);
     undoAct->setIcon(QIcon(":/resources/undo.png"));
     connect(undoAct, SIGNAL(triggered()), this, SLOT(undo()));
 
     redoAct = new QAction("Redo", this);
     redoAct->setStatusTip("Redo the next action");
+    redoAct->setShortcuts(QKeySequence::Redo);
     redoAct->setIcon(QIcon(":/resources/redo.png"));
     connect(redoAct, SIGNAL(triggered()), this, SLOT(redo()));
 
@@ -88,6 +251,7 @@ void MainWindow::createActions()
 
     insertAct = new QAction("Insert", this);
     insertAct->setStatusTip("Insert a figure");
+    insertAct->setIcon(QIcon(":/resources/hexagon.png"));
     connect(insertAct, SIGNAL(triggered()), this, SLOT(insert()));
 
     lineAct = new QAction("Line", this);
@@ -102,42 +266,52 @@ void MainWindow::createActions()
 
     insert4PolygonAct = new QAction("Square", this);
     insert4PolygonAct->setStatusTip("Insert square");
+    insert4PolygonAct->setIcon(QIcon(":/resources/square.png"));
     connect(insert4PolygonAct, SIGNAL(triggered()), this, SLOT(insert4Polygon()));
 
     insert5PolygonAct = new QAction("Pentagon", this);
     insert5PolygonAct->setStatusTip("Insert pentagon");
+    insert5PolygonAct->setIcon(QIcon(":/resources/pentagon.png"));
     connect(insert5PolygonAct, SIGNAL(triggered()), this, SLOT(insert5Polygon()));
 
     insert6PolygonAct = new QAction("Hexagon", this);
     insert6PolygonAct->setStatusTip("Insert hexagon");
+    insert6PolygonAct->setIcon(QIcon(":/resources/hexagon.png"));
     connect(insert6PolygonAct, SIGNAL(triggered()), this, SLOT(insert6Polygon()));
 
     insert7PolygonAct = new QAction("Heptagon", this);
     insert7PolygonAct->setStatusTip("Insert heptagon");
+    insert7PolygonAct->setIcon(QIcon(":/resources/heptagon.png"));
     connect(insert7PolygonAct, SIGNAL(triggered()), this, SLOT(insert7Polygon()));
 
     insert8PolygonAct = new QAction("Octagon", this);
     insert8PolygonAct->setStatusTip("Insert octagon");
+    insert8PolygonAct->setIcon(QIcon(":/resources/octagon.png"));
     connect(insert8PolygonAct, SIGNAL(triggered()), this, SLOT(insert8Polygon()));
 
     insert4StarAct = new QAction("Square Star", this);
     insert4StarAct->setStatusTip("Insert square star");
+    insert4StarAct->setIcon(QIcon(":/resources/square_star.png"));
     connect(insert4StarAct, SIGNAL(triggered()), this, SLOT(insert4Star()));
 
     insert5StarAct = new QAction("Pentagonal star", this);
     insert5StarAct->setStatusTip("Insert pentagonal star");
+    insert5StarAct->setIcon(QIcon(":/resources/pentagonal_star.png"));
     connect(insert5StarAct, SIGNAL(triggered()), this, SLOT(insert5Star()));
 
     insert6StarAct = new QAction("Hexagonal star", this);
     insert6StarAct->setStatusTip("Insert hexagonal star");
+    insert6StarAct->setIcon(QIcon(":/resources/hexagonal_star.png"));
     connect(insert6StarAct, SIGNAL(triggered()), this, SLOT(insert6Star()));
 
     insert7StarAct = new QAction("Heptagonal star", this);
     insert7StarAct->setStatusTip("Insert heptagonal star");
+    insert7StarAct->setIcon(QIcon(":/resources/heptagonal_star.png"));
     connect(insert7StarAct, SIGNAL(triggered()), this, SLOT(insert7Star()));
 
     insert8StarAct = new QAction("Octagonal star", this);
     insert8StarAct->setStatusTip("Insert octagonal star");
+    insert8StarAct->setIcon(QIcon(":/resources/octagonal_star.png"));
     connect(insert8StarAct, SIGNAL(triggered()), this, SLOT(insert8Star()));
 
     setKcolorAct = new QAction("Black", this);

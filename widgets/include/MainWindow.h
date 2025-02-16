@@ -1,26 +1,27 @@
 #pragma once
 
 #include <QMainWindow>
-#include <QMenuBar>
-#include <QAction>
 #include <QToolBar>
-#include <QMenu>
-#include <QStyle>
+
+#include "RenderArea.h"
 
 #if defined MAKE_UI_LIB
-    #define UI_LIB_EXPORT Q_DECL_EXPORT
+#define UI_LIB_EXPORT Q_DECL_EXPORT
 #else
-    #define UI_LIB_EXPORT Q_DECL_IMPORT
+#define UI_LIB_EXPORT Q_DECL_IMPORT
 #endif
 
-class UI_LIB_EXPORT MainWindow  final: public QMainWindow
+class UI_LIB_EXPORT MainWindow final : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(QWidget *parent = nullptr);
+
+
 
 private slots:
+    void resizeEvent(QResizeEvent *event) override;
     void newFile();
     void open();
     void save();
@@ -52,44 +53,55 @@ private slots:
     void setWcolor();
     void about();
 
+    void onCanvasPressed(const QPoint &point);
+    void onMouseMovedOverCanvas(const QPoint &point);
+
 private:
     void createActions();
     void createMenus();
     void createToolBar();
 
 private:
-    QMenu *fileMenu;
-    QMenu *editMenu;
-    QMenu *aboutMenu;
-    QAction *newFileAct;
-    QAction *openAct;
-    QAction *saveAct;
-    QAction *undoAct;
-    QAction *redoAct;
-    QAction *cleanAct;
-    QAction *resizeAct;
-    QAction *setPenAct;
-    QAction *insertAct;
-    QAction *lineAct;
-    QAction *fillAct;
-    QAction *insert4PolygonAct;
-    QAction *insert5PolygonAct;
-    QAction *insert6PolygonAct;
-    QAction *insert7PolygonAct;
-    QAction *insert8PolygonAct;
-    QAction *insert4StarAct;
-    QAction *insert5StarAct;
-    QAction *insert6StarAct;
-    QAction *insert7StarAct;
-    QAction *insert8StarAct;
-    QAction *setKcolorAct;
-    QAction *setRcolorAct;
-    QAction *setRGcolorAct;
-    QAction *setGcolorAct;
-    QAction *setGBcolorAct;
-    QAction *setBcolorAct;
-    QAction *setBRcolorAct;
-    QAction *setWcolorAct;
-    QAction *aboutAct;
-    QToolBar *mainToolBar;
+    enum Mode { MODE_LINE = 1, MODE_FILL = 2, MODE_POLYGON = 3, MODE_STAR = 4 };
+
+private:
+    QMenu *fileMenu{};
+    QMenu *editMenu{};
+    QMenu *aboutMenu{};
+    QAction *newFileAct{};
+    QAction *openAct{};
+    QAction *saveAct{};
+    QAction *undoAct{};
+    QAction *redoAct{};
+    QAction *cleanAct{};
+    QAction *resizeAct{};
+    QAction *setPenAct{};
+    QAction *insertAct{};
+    QAction *lineAct{};
+    QAction *fillAct{};
+    QAction *insert4PolygonAct{};
+    QAction *insert5PolygonAct{};
+    QAction *insert6PolygonAct{};
+    QAction *insert7PolygonAct{};
+    QAction *insert8PolygonAct{};
+    QAction *insert4StarAct{};
+    QAction *insert5StarAct{};
+    QAction *insert6StarAct{};
+    QAction *insert7StarAct{};
+    QAction *insert8StarAct{};
+    QAction *setKcolorAct{};
+    QAction *setRcolorAct{};
+    QAction *setRGcolorAct{};
+    QAction *setGcolorAct{};
+    QAction *setGBcolorAct{};
+    QAction *setBcolorAct{};
+    QAction *setBRcolorAct{};
+    QAction *setWcolorAct{};
+    QAction *aboutAct{};
+    QToolBar *mainToolBar{};
+    QScrollArea *scrollArea{};
+    RenderArea *renderArea{};
+    int clickCount = 0;
+    enum Mode currentMode = MODE_LINE;
+    int currentVerticesCount = 0;
 };

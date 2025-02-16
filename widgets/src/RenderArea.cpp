@@ -2,34 +2,67 @@
 #include <QSize>
 #include <QTransform>
 
+#include <qevent.h>
+
 RenderArea::RenderArea(QWidget *parent)
-    : QWidget(parent), m_painter(this)
+    : QWidget(parent)
 {
-    m_render = QImage(100, 100, QImage::Format_ARGB32);
+    for (int i = 0; i != mouse_points_limit; ++i) {
+        mouse_points.emplace_back(-1, -1);
+    }
+    m_render = QImage(400, 400, QImage::Format_ARGB32);
     m_render.fill(Qt::white);
     m_screenshots.push_back(m_render);
+    setMouseTracking(true);
     update();
 }
 
 QSize RenderArea::minimumSizeHint() const
 {
-    return QSize(100, 100);
+    return QSize(0, 0);
 }
 QSize RenderArea::sizeHint() const
 {
-    return QSize(400, 400);
+    return QSize(402, 402);
 }
+QPoint RenderArea::getLastPressed() const
+{
+    return mouse_points.front();
+}
+QPoint RenderArea::getCurrentPressed() const
+{
+    return mouse_points.back();
+}
+void RenderArea::mousePressEvent(QMouseEvent *event)
+{
+    while (mouse_points.size() > mouse_points_limit - 1) {
+        mouse_points.erase(mouse_points.begin());
+    }
+    mouse_points.push_back(event->position().toPoint());
+    emit mousePressed(mouse_points.back());
+    QWidget::mousePressEvent(event);
+}
+void RenderArea::mouseMoveEvent(QMouseEvent *event)
+{
+    emit mouseMoved(event->position().toPoint());
+    QWidget::mouseMoveEvent(event);
+}
+
 void RenderArea::resizeImage(const QSize &size)
 {
     m_render = m_screenshots[opened_step_index].scaled(size, Qt::KeepAspectRatio, Qt::FastTransformation);
+    resize(m_render.width()+2, m_render.height()+2);
+    update();
 }
 void RenderArea::setColor(const QColor &color)
 {
     m_pen.setColor(color);
+    update();
 }
 void RenderArea::setPenWidth(const int &width)
 {
     m_pen.setWidth(width);
+    update();
 }
 
 inline void bresenhamAlgorithm(
@@ -46,33 +79,6 @@ inline void bresenhamAlgorithm(
     if (x_dif != 0) { // line y = ax + b
         if (abs(y_dif) > abs(x_dif)) {
             is_swap = true;
-            if (y_dif > 0) {
-                if (x_dif > 0) {
-                } else {
-                    y_q = -1;
-                }
-            } else {
-                if (x_dif > 0) {
-                    x_q = -1;
-                } else {
-                    x_q = -1;
-                    y_q = -1;
-                }
-            }
-        } else {
-            if (y_dif > 0) {
-                if (x_dif > 0) {
-                } else {
-                    x_q = -1;
-                }
-            } else {
-                if (x_dif > 0) {
-                    y_q = -1;
-                } else {
-                    x_q = -1;
-                    y_q = -1;
-                }
-            }
         }
     } else { //vertical line
         if (y_dif > 0) {
@@ -85,10 +91,14 @@ inline void bresenhamAlgorithm(
             return;
         }
     }
-
-    x_dif *= x_q;
-    y_dif *= y_q;
-
+    if (x_dif != 0) {
+        x_q = x_dif / abs(x_dif);
+        x_dif *= x_q;
+    }
+    if (y_dif != 0) {
+        y_q =  y_dif / abs(y_dif);
+        y_dif *= y_q;
+    }
     if (is_swap) {
         const int tmp = x_dif;
         x_dif = y_dif;
@@ -103,7 +113,7 @@ inline void bresenhamAlgorithm(
 
     for (int i = 0; i < x_dif; ++i) {
         if (is_swap) {
-            current_y += x_q;
+            current_y += y_q;
         } else {
             current_x += x_q;
         }
@@ -112,7 +122,7 @@ inline void bresenhamAlgorithm(
         if (err > 0) {
             err -= 2 * x_dif;
             if (is_swap) {
-                current_x += y_q;
+                current_x += x_q;
             } else {
                 current_y += y_q;
             }
@@ -139,7 +149,7 @@ void RenderArea::drawPolygon(const QPoint &center, const QPoint &vertex, const i
 {
     m_render = m_screenshots[opened_step_index];
     //calculate points
-    float angle = 360 / vertexCount;
+    float angle = 360.0F / vertexCount;
     QTransform rotation = QTransform()
                               .translate(center.x(), center.y())
                               .rotate(-angle)
@@ -213,13 +223,13 @@ void RenderArea::fillArea(const QPoint &seed) //span algorithm
         QPoint left = right + QPoint(-1, 0);
         while (m_render.pixelColor(left) == inside_color) {
             m_render.setPixelColor(left, m_pen.color());
-            left = left + QPoint(-1, 0);
+            left += QPoint(-1, 0);
         }
+        left += QPoint(1, 0);
         while (m_render.pixelColor(right) == inside_color) {
             m_render.setPixelColor(right, m_pen.color());
             right = right + QPoint(1, 0);
         }
-        right = right + QPoint(-1, 0);
         scanSpan(m_render, inside_color, left + QPoint(0, 1), right + QPoint(0, 1), stack);
         scanSpan(m_render, inside_color, left + QPoint(0, -1), right + QPoint(0, -1), stack);
     }
@@ -249,8 +259,20 @@ void RenderArea::redo()
     m_render = m_screenshots[opened_step_index];
     update();
 }
+void RenderArea::clean()
+{
+    m_render = m_screenshots[opened_step_index];
+    m_render.fill(Qt::white);
+    make_screenshot();
+    update();
+}
 void RenderArea::paintEvent(QPaintEvent *event)
 {
-    QWidget::paintEvent(event);
-    m_painter.drawImage(QRect(0, 0, m_render.width(), m_render.height()), m_render);
+    QPainter painter(this);
+    painter.setPen(QPen(Qt::black, 1,Qt::SolidLine));
+    painter.drawLine(QPoint(0, 0), QPoint(m_render.width() + 1, 0));
+    painter.drawLine(QPoint(m_render.width() + 1, 0), QPoint(m_render.width() + 1, m_render.height() + 1));
+    painter.drawLine(QPoint(m_render.width() + 1, m_render.height() + 1), QPoint(0, m_render.height() + 1));
+    painter.drawLine(QPoint(0, m_render.height() + 1), QPoint(0, 0));
+    painter.drawImage(QRect(1, 1, m_render.width(), m_render.height()), m_render);
 }
