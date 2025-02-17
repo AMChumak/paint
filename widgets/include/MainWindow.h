@@ -99,6 +99,8 @@ private:
     QAction *setBRcolorAct{};
     QAction *setWcolorAct{};
     QAction *aboutAct{};
+    QActionGroup *colorsGroup;
+    QActionGroup *toolGroup;
     QToolBar *mainToolBar{};
     QScrollArea *scrollArea{};
     RenderArea *renderArea{};
