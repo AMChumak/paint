@@ -22,7 +22,7 @@ ResizeWindow::ResizeWindow(QWidget *parent, const QSize &currentSize)
     v_size_lbl = new QLabel("vertical size:");
     h_size_lbl = new QLabel("horizontal size:");
 
-    ok_button = new QPushButton("OK");
+    buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
     grid = new QGridLayout();
     grid->setSpacing(5);
@@ -34,13 +34,18 @@ ResizeWindow::ResizeWindow(QWidget *parent, const QSize &currentSize)
     m_layout = new QVBoxLayout();
     m_layout->setSpacing(5);
     m_layout->addLayout(grid);
-    m_layout->addWidget(ok_button);
+    m_layout->addWidget(buttonBox);
     setLayout(m_layout);
 
-    connect(ok_button, SIGNAL(pressed()), this, SLOT(onOKClicked()));
+    connect(buttonBox, SIGNAL(accepted()), this, SLOT(onOKClicked()));
+    connect(buttonBox, SIGNAL(rejected()), this, SLOT(onCancelClicked()));
 }
 void ResizeWindow::onOKClicked()
 {
     emit getNewSize(QSize{h_size_spinbox->value(), v_size_spinbox->value()});
+    close();
+}
+void ResizeWindow::onCancelClicked()
+{
     close();
 }

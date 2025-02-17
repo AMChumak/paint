@@ -6,6 +6,7 @@
 #include <QSpinBox>
 #include <QVBoxLayout>
 #include <QWidget>
+#include <QDialogButtonBox>
 
 class ResizeWindow : public QWidget
 {
@@ -19,6 +20,7 @@ signals:
 
 private slots:
     void onOKClicked();
+    void onCancelClicked();
 
 private:
     QVBoxLayout *m_layout;
@@ -27,5 +29,5 @@ private:
     QLabel *h_size_lbl;
     QSpinBox *v_size_spinbox;
     QSpinBox *h_size_spinbox;
-    QPushButton *ok_button;
+    QDialogButtonBox *buttonBox;
 };
