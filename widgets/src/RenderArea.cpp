@@ -180,11 +180,12 @@ void RenderArea::drawPolygon(const QPoint &center, const QPoint &vertex, const i
                               .translate(-center.x(), -center.y());
 
     QPoint last = vertex;
-    for (int i = 0; i < vertexCount; ++i) {
+    for (int i = 0; i < vertexCount - 1; ++i) {
         QPoint next = rotation.map(last);
         bresenhamAlgorithm(m_render, m_pen.color(), last, next);
         last = next;
     }
+    bresenhamAlgorithm(m_render, m_pen.color(), last, vertex);
     update();
 }
 void RenderArea::drawStar(const QPoint &center, const QPoint &vertex, const int &limbCount)
@@ -206,7 +207,7 @@ void RenderArea::drawStar(const QPoint &center, const QPoint &vertex, const int 
     QPoint inner_point = half_rotation.map(center + (vertex - center) / 3);
 
     QPoint last = vertex;
-    for (int i = 0; i < limbCount; ++i) {
+    for (int i = 0; i < limbCount - 1; ++i) {
         QPoint next = rotation.map(last);
         bresenhamAlgorithm(m_render, m_pen.color(), last, inner_point);
         bresenhamAlgorithm(m_render, m_pen.color(), inner_point, next);
@@ -214,6 +215,8 @@ void RenderArea::drawStar(const QPoint &center, const QPoint &vertex, const int 
         last = next;
         inner_point = rotation.map(inner_point);
     }
+    bresenhamAlgorithm(m_render, m_pen.color(), last, inner_point);
+    bresenhamAlgorithm(m_render, m_pen.color(), inner_point, vertex);
     update();
 }
 
@@ -267,18 +270,20 @@ void RenderArea::fillArea(const QPoint &seed) //span algorithm
 
 void RenderArea::make_screenshot()
 {
-    ++opened_step_index;
-    if (opened_step_index < m_screenshots.size()) { // create new memory branch
-        m_screenshots.erase(m_screenshots.begin() + opened_step_index, m_screenshots.end());
+    if (opened_step_index < m_screenshots.size() - 1) { // create new memory branch
+        m_screenshots.erase(m_screenshots.begin() + opened_step_index + 1, m_screenshots.end());
     }
+
     if (m_screenshots.size() > screenshots_limit) { // check that screenshots vector is not overflow
         m_screenshots.erase(m_screenshots.begin());
+    } else {
+        ++opened_step_index;
     }
     m_screenshots.push_back(m_render);
 }
 void RenderArea::undo()
 {
-    if (opened_step_index)
+    if (opened_step_index > 0)
         --opened_step_index;
     load_screenshot(opened_step_index);
     update();
@@ -295,6 +300,11 @@ void RenderArea::clean()
     load_screenshot(opened_step_index);
     m_render.fill(Qt::white);
     make_screenshot();
+    update();
+}
+void RenderArea::loadLastScreen()
+{
+    load_screenshot(opened_step_index);
     update();
 }
 void RenderArea::paintEvent(QPaintEvent *event)

@@ -31,17 +31,26 @@ MainWindow::MainWindow(QWidget *parent)
 
 void MainWindow::resizeEvent(QResizeEvent *event)
 {
+    clickCount = 0;
     scrollArea->resize(event->size().width(), event->size().height());
     update();
     QMainWindow::resizeEvent(event);
 }
+void MainWindow::mouseMoveEvent(QMouseEvent *event)
+{
+    renderArea->loadLastScreen();
+    QMainWindow::mouseMoveEvent(event);
+}
 
 void MainWindow::newFile()
 {
+    clickCount = 0;
     renderArea->initFile();
 }
 void MainWindow::open()
 {
+    clickCount = 0;
+    renderArea->loadLastScreen();
     QString fileName = QFileDialog::getOpenFileName(this);
     if (fileName.isEmpty()) {
         return;
@@ -50,7 +59,9 @@ void MainWindow::open()
 }
 void MainWindow::save()
 {
-    QString fileName = QFileDialog::getSaveFileName(this, "Save file", QDir::homePath(), "*.png" );
+    clickCount = 0;
+    renderArea->loadLastScreen();
+    QString fileName = QFileDialog::getSaveFileName(this, "Save file", QDir::homePath(), "*.png");
     if (fileName.isEmpty()) {
         return;
     }
@@ -58,119 +69,150 @@ void MainWindow::save()
 }
 void MainWindow::undo()
 {
+    clickCount = 0;
     renderArea->undo();
 }
 void MainWindow::redo()
 {
+    clickCount = 0;
     renderArea->redo();
 }
 void MainWindow::clean()
 {
+    clickCount = 0;
     renderArea->clean();
 }
-void MainWindow::resize()
-{}
+void MainWindow::resize() {}
 void MainWindow::setPen() {}
 void MainWindow::insert() {}
 void MainWindow::line()
 {
     clickCount = 0;
+    renderArea->loadLastScreen();
     currentMode = MODE_LINE;
 }
 void MainWindow::fill()
 {
     clickCount = 0;
+    renderArea->loadLastScreen();
     currentMode = MODE_FILL;
 }
 void MainWindow::insert4Polygon()
 {
     clickCount = 0;
+    renderArea->loadLastScreen();
     currentMode = MODE_POLYGON;
     currentVerticesCount = 4;
 }
 void MainWindow::insert5Polygon()
 {
     clickCount = 0;
+    renderArea->loadLastScreen();
     currentMode = MODE_POLYGON;
     currentVerticesCount = 5;
 }
 void MainWindow::insert6Polygon()
 {
     clickCount = 0;
+    renderArea->loadLastScreen();
     currentMode = MODE_POLYGON;
     currentVerticesCount = 6;
 }
 void MainWindow::insert7Polygon()
 {
     clickCount = 0;
+    renderArea->loadLastScreen();
     currentMode = MODE_POLYGON;
     currentVerticesCount = 7;
 }
 void MainWindow::insert8Polygon()
 {
     clickCount = 0;
+    renderArea->loadLastScreen();
     currentMode = MODE_POLYGON;
     currentVerticesCount = 8;
 }
 void MainWindow::insert4Star()
 {
     clickCount = 0;
+    renderArea->loadLastScreen();
     currentMode = MODE_STAR;
     currentVerticesCount = 4;
 }
 void MainWindow::insert5Star()
 {
     clickCount = 0;
+    renderArea->loadLastScreen();
     currentMode = MODE_STAR;
     currentVerticesCount = 5;
 }
 void MainWindow::insert6Star()
 {
     clickCount = 0;
+    renderArea->loadLastScreen();
     currentMode = MODE_STAR;
     currentVerticesCount = 6;
 }
 void MainWindow::insert7Star()
 {
     clickCount = 0;
+    renderArea->loadLastScreen();
     currentMode = MODE_STAR;
     currentVerticesCount = 7;
 }
 void MainWindow::insert8Star()
 {
     clickCount = 0;
+    renderArea->loadLastScreen();
     currentMode = MODE_STAR;
     currentVerticesCount = 8;
 }
 void MainWindow::setKcolor()
 {
+    clickCount = 0;
+    renderArea->loadLastScreen();
     renderArea->setColor(Qt::black);
 }
-void MainWindow::setRcolor() {
+void MainWindow::setRcolor()
+{
+    clickCount = 0;
+    renderArea->loadLastScreen();
     renderArea->setColor(Qt::red);
 }
 void MainWindow::setRGcolor()
 {
+    clickCount = 0;
+    renderArea->loadLastScreen();
     renderArea->setColor(Qt::yellow);
 }
 void MainWindow::setGcolor()
 {
+    clickCount = 0;
+    renderArea->loadLastScreen();
     renderArea->setColor(Qt::green);
 }
 void MainWindow::setGBcolor()
 {
+    clickCount = 0;
+    renderArea->loadLastScreen();
     renderArea->setColor(Qt::cyan);
 }
 void MainWindow::setBcolor()
 {
+    clickCount = 0;
+    renderArea->loadLastScreen();
     renderArea->setColor(Qt::blue);
 }
 void MainWindow::setBRcolor()
 {
+    clickCount = 0;
+    renderArea->loadLastScreen();
     renderArea->setColor(Qt::magenta);
 }
 void MainWindow::setWcolor()
 {
+    clickCount = 0;
+    renderArea->loadLastScreen();
     renderArea->setColor(Qt::white);
 }
 void MainWindow::about() {}
@@ -179,47 +221,51 @@ void MainWindow::onCanvasPressed(const QPoint &point)
 {
     clickCount++;
     switch (currentMode) {
-        case MODE_FILL: {
-            if (clickCount == 1) {
-                renderArea->fillArea(point);
-                renderArea->make_screenshot();
-                clickCount = 0;
-            }
-            break;
+    case MODE_FILL: {
+        if (clickCount == 1) {
+            renderArea->fillArea(point);
+            renderArea->make_screenshot();
+            clickCount = 0;
         }
-        default: {
-            if (clickCount == 2) {
-                renderArea->make_screenshot();
-                clickCount = 0;
-            }
-            break;
+        break;
+    }
+    default: {
+        if (clickCount == 2) {
+            renderArea->make_screenshot();
+            clickCount = 0;
         }
+        break;
+    }
     }
 }
 void MainWindow::onMouseMovedOverCanvas(const QPoint &point)
 {
+    if (point.x() == 0 || point.x() == renderArea->width() - 1 || point.y() == 0
+        || point.y() == renderArea->height() - 1) {
+        return;
+    }
     switch (currentMode) {
-        case MODE_LINE: {
-            if (clickCount == 1) {
-                QPoint begin = renderArea->getCurrentPressed();
-                renderArea->drawLine(begin, point);
-            }
-            break;
+    case MODE_LINE: {
+        if (clickCount == 1) {
+            QPoint begin = renderArea->getCurrentPressed();
+            renderArea->drawLine(begin, point);
         }
-        case MODE_POLYGON: {
-            if (clickCount == 1) {
-                QPoint center = renderArea->getCurrentPressed();
-                renderArea->drawPolygon(center, point,currentVerticesCount);
-            }
-            break;
+        break;
+    }
+    case MODE_POLYGON: {
+        if (clickCount == 1) {
+            QPoint center = renderArea->getCurrentPressed();
+            renderArea->drawPolygon(center, point, currentVerticesCount);
         }
-        case MODE_STAR: {
-            if (clickCount == 1) {
-                QPoint center = renderArea->getCurrentPressed();
-                renderArea->drawStar(center, point,currentVerticesCount);
-            }
-            break;
+        break;
+    }
+    case MODE_STAR: {
+        if (clickCount == 1) {
+            QPoint center = renderArea->getCurrentPressed();
+            renderArea->drawStar(center, point, currentVerticesCount);
         }
+        break;
+    }
     default:
         break;
     }
@@ -378,9 +424,6 @@ void MainWindow::createActions()
     aboutAct->setStatusTip("About the application");
     aboutAct->setIcon(QIcon(":/resources/about.png"));
     connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
-
-
-
 }
 void MainWindow::createMenus()
 {

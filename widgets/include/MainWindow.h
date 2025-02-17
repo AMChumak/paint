@@ -22,6 +22,7 @@ public:
 
 private slots:
     void resizeEvent(QResizeEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
     void newFile();
     void open();
     void save();

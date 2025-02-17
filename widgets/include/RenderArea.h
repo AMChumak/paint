@@ -37,6 +37,7 @@ public slots:
     void undo();
     void redo();
     void clean();
+    void loadLastScreen();
 
 protected:
     void paintEvent(QPaintEvent *event) override;
