@@ -73,8 +73,12 @@ void RenderArea::saveFile(const QString &fileName)
 
 void RenderArea::resizeImage(const QSize &size)
 {
-    m_render = m_screenshots[opened_step_index].scaled(size, Qt::KeepAspectRatio, Qt::FastTransformation);
+    m_render = QImage(size.width(), size.height(), QImage::Format_ARGB32);
+    QPainter painter(&m_render);
+    m_render.fill(Qt::white);
+    painter.drawImage(0, 0, m_screenshots[opened_step_index]);
     resize(m_render.width()+2, m_render.height()+2);
+    make_screenshot();
     update();
 }
 void RenderArea::setColor(const QColor &color)

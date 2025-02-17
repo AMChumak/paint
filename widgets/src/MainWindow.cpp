@@ -1,14 +1,13 @@
 #include "MainWindow.h"
+#include "ResizeWindow.h"
 #include <QAction>
+#include <QActionGroup>
 #include <QFileDialog>
 #include <QFrame>
 #include <QMenu>
 #include <QMenuBar>
 #include <QResizeEvent>
 #include <QStyle>
-#include <QActionGroup>
-
-#include <oneapi/tbb/detail/_machine.h>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -21,7 +20,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(renderArea, &RenderArea::mousePressed, this, &MainWindow::onCanvasPressed);
     connect(renderArea, &RenderArea::mouseMoved, this, &MainWindow::onMouseMovedOverCanvas);
-
 
     createActions();
     createMenus();
@@ -83,7 +81,17 @@ void MainWindow::clean()
     clickCount = 0;
     renderArea->clean();
 }
-void MainWindow::resize() {}
+void MainWindow::resize()
+{
+    ResizeWindow *resizeWindow
+        = new ResizeWindow(this, QSize{renderArea->width() - 2, renderArea->height() - 2});
+    QRect rect = geometry();
+    resizeWindow->move(
+        rect.width() / 2 - resizeWindow->width() / 2,
+        rect.height() / 2 - resizeWindow->height() / 2);
+    resizeWindow->show();
+    connect(resizeWindow, &ResizeWindow::getNewSize, renderArea, &RenderArea::resizeImage);
+}
 void MainWindow::setPen() {}
 void MainWindow::insert()
 {
@@ -494,7 +502,6 @@ void MainWindow::createActions()
     aboutAct->setStatusTip("About the application");
     aboutAct->setIcon(QIcon(":/resources/about.png"));
     connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
-
 
     //standard values
     setKcolorAct->setChecked(true);
