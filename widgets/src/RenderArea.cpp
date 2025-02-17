@@ -1,20 +1,14 @@
 #include "RenderArea.h"
 #include <QSize>
 #include <QTransform>
-
+#include <QFile>
 #include <qevent.h>
 
 RenderArea::RenderArea(QWidget *parent)
     : QWidget(parent)
 {
-    for (int i = 0; i != mouse_points_limit; ++i) {
-        mouse_points.emplace_back(-1, -1);
-    }
-    m_render = QImage(400, 400, QImage::Format_ARGB32);
-    m_render.fill(Qt::white);
-    m_screenshots.push_back(m_render);
     setMouseTracking(true);
-    update();
+    initFile();
 }
 
 QSize RenderArea::minimumSizeHint() const
@@ -46,6 +40,35 @@ void RenderArea::mouseMoveEvent(QMouseEvent *event)
 {
     emit mouseMoved(event->position().toPoint());
     QWidget::mouseMoveEvent(event);
+}
+void RenderArea::initFile()
+{
+    mouse_points.clear();
+    m_screenshots.clear();
+    for (int i = 0; i != mouse_points_limit; ++i) {
+        mouse_points.emplace_back(-1, -1);
+    }
+    m_render = QImage(400, 400, QImage::Format_ARGB32);
+    m_render.fill(Qt::white);
+    m_screenshots.push_back(m_render);
+    update();
+}
+void RenderArea::loadFile(const QString &fileName)
+{
+    QImage image(fileName);
+    if (image.isNull()) {
+        return;
+    }
+    m_render = image;
+    resize(m_render.width() + 2, m_render.height() + 2);
+    make_screenshot();
+    update();
+}
+void RenderArea::saveFile(const QString &fileName)
+{
+    load_screenshot(opened_step_index);
+    QFile file(fileName);
+    m_render.save(&file);
 }
 
 void RenderArea::resizeImage(const QSize &size)
@@ -133,7 +156,7 @@ inline void bresenhamAlgorithm(
 
 void RenderArea::drawLine(const QPoint &begin, const QPoint &end)
 {
-    m_render = m_screenshots[opened_step_index];
+    load_screenshot(opened_step_index);
     if (m_pen.width() == 1) { // Bresenham algorithm
         bresenhamAlgorithm(m_render, m_pen.color(), begin, end);
     } else {
@@ -147,7 +170,7 @@ void RenderArea::drawLine(const QPoint &begin, const QPoint &end)
 }
 void RenderArea::drawPolygon(const QPoint &center, const QPoint &vertex, const int &vertexCount)
 {
-    m_render = m_screenshots[opened_step_index];
+    load_screenshot(opened_step_index);
     //calculate points
     float angle = 360.0F / vertexCount;
     QTransform rotation = QTransform()
@@ -165,7 +188,7 @@ void RenderArea::drawPolygon(const QPoint &center, const QPoint &vertex, const i
 }
 void RenderArea::drawStar(const QPoint &center, const QPoint &vertex, const int &limbCount)
 {
-    m_render = m_screenshots[opened_step_index];
+    load_screenshot(opened_step_index);
     //calculate points
     float angle = 360 / limbCount;
 
@@ -213,7 +236,7 @@ void scanSpan(
 
 void RenderArea::fillArea(const QPoint &seed) //span algorithm
 {
-    m_render = m_screenshots[opened_step_index];
+    load_screenshot(opened_step_index);
     QColor inside_color = m_render.pixelColor(seed);
     std::vector<QPoint> stack;
     stack.push_back(seed);
@@ -251,19 +274,21 @@ void RenderArea::make_screenshot()
 }
 void RenderArea::undo()
 {
-    ++opened_step_index;
-    m_render = m_screenshots[opened_step_index];
+    if (opened_step_index)
+        --opened_step_index;
+    load_screenshot(opened_step_index);
     update();
 }
 void RenderArea::redo()
 {
-    ++opened_step_index;
-    m_render = m_screenshots[opened_step_index];
+    if (opened_step_index < m_screenshots.size() - 1)
+        ++opened_step_index;
+    load_screenshot(opened_step_index);
     update();
 }
 void RenderArea::clean()
 {
-    m_render = m_screenshots[opened_step_index];
+    load_screenshot(opened_step_index);
     m_render.fill(Qt::white);
     make_screenshot();
     update();
@@ -277,4 +302,10 @@ void RenderArea::paintEvent(QPaintEvent *event)
     painter.drawLine(QPoint(m_render.width() + 1, m_render.height() + 1), QPoint(0, m_render.height() + 1));
     painter.drawLine(QPoint(0, m_render.height() + 1), QPoint(0, 0));
     painter.drawImage(QRect(1, 1, m_render.width(), m_render.height()), m_render);
+}
+
+void RenderArea::load_screenshot(int i)
+{
+    m_render = m_screenshots[opened_step_index];
+    resize(m_render.width() + 2, m_render.height() + 2);
 }

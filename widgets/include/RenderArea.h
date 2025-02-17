@@ -23,6 +23,9 @@ signals:
 public slots:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
+    void initFile();
+    void loadFile(const QString &fileName);
+    void saveFile(const QString &fileName);
     void resizeImage(const QSize &size);
     void setColor(const QColor &color);
     void setPenWidth(const int &width);
@@ -37,6 +40,9 @@ public slots:
 
 protected:
     void paintEvent(QPaintEvent *event) override;
+
+private:
+    void load_screenshot(int i);
 
 private:
     QPen m_pen;

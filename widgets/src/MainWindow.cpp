@@ -1,11 +1,13 @@
 #include "MainWindow.h"
 #include <QAction>
-#include <QStyle>
+#include <QFileDialog>
+#include <QFrame>
 #include <QMenu>
 #include <QMenuBar>
 #include <QResizeEvent>
-#include <QFrame>
-#include <QResizeEvent>
+#include <QStyle>
+
+#include <oneapi/tbb/detail/_machine.h>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -18,6 +20,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(renderArea, &RenderArea::mousePressed, this, &MainWindow::onCanvasPressed);
     connect(renderArea, &RenderArea::mouseMoved, this, &MainWindow::onMouseMovedOverCanvas);
+
 
     createActions();
     createMenus();
@@ -33,9 +36,26 @@ void MainWindow::resizeEvent(QResizeEvent *event)
     QMainWindow::resizeEvent(event);
 }
 
-void MainWindow::newFile() {}
-void MainWindow::open() {}
-void MainWindow::save() {}
+void MainWindow::newFile()
+{
+    renderArea->initFile();
+}
+void MainWindow::open()
+{
+    QString fileName = QFileDialog::getOpenFileName(this);
+    if (fileName.isEmpty()) {
+        return;
+    }
+    renderArea->loadFile(fileName);
+}
+void MainWindow::save()
+{
+    QString fileName = QFileDialog::getSaveFileName(this, "Save file", QDir::homePath(), "*.png" );
+    if (fileName.isEmpty()) {
+        return;
+    }
+    renderArea->saveFile(fileName);
+}
 void MainWindow::undo()
 {
     renderArea->undo();
