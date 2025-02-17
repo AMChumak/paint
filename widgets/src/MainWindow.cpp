@@ -12,11 +12,16 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
+    m_layout = new QVBoxLayout;
     scrollArea = new QScrollArea(this);
-    renderArea = new RenderArea(this);
-    scrollArea->resize(1200, 1200);
+    renderArea = new RenderArea(scrollArea);
     scrollArea->setWidget(renderArea);
-    scrollArea->move(0, menuBar()->height());
+    m_layout->addWidget(menuBar());
+    m_layout->addWidget(scrollArea);
+    window = new QWidget();
+    window->setLayout(m_layout);
+    setCentralWidget(window);
+
 
     connect(renderArea, &RenderArea::mousePressed, this, &MainWindow::onCanvasPressed);
     connect(renderArea, &RenderArea::mouseMoved, this, &MainWindow::onMouseMovedOverCanvas);

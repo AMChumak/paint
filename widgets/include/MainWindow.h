@@ -2,7 +2,7 @@
 
 #include <QMainWindow>
 #include <QToolBar>
-
+#include <QVBoxLayout>
 #include "RenderArea.h"
 
 #if defined MAKE_UI_LIB
@@ -66,6 +66,8 @@ private:
     enum Mode { MODE_LINE = 1, MODE_FILL = 2, MODE_POLYGON = 3, MODE_STAR = 4 };
 
 private:
+    QWidget *window;
+    QVBoxLayout *m_layout;
     QMenu *fileMenu{};
     QMenu *editMenu{};
     QMenu *aboutMenu{};
