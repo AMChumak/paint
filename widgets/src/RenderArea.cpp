@@ -150,7 +150,8 @@ inline void bresenhamAlgorithm(
                 current_y += y_q;
             }
         }
-        image.setPixelColor(current_x, current_y, color);
+        if (current_x >= 0 && current_y >= 0 && current_x < image.width() && current_y < image.height())
+            image.setPixelColor(current_x, current_y, color);
     }
 }
 
@@ -238,6 +239,9 @@ void RenderArea::fillArea(const QPoint &seed) //span algorithm
 {
     load_screenshot(opened_step_index);
     QColor inside_color = m_render.pixelColor(seed);
+    if (m_pen.color() == inside_color) {
+        return;
+    }
     std::vector<QPoint> stack;
     stack.push_back(seed);
     while (!stack.empty()) {
