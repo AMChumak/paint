@@ -30,7 +30,8 @@ private slots:
     void redo();
     void clean();
     void resize();
-    void setPen();
+    void palette();
+    void penWidth();
     void insert();
     void line();
     void fill();
@@ -78,7 +79,8 @@ private:
     QAction *redoAct{};
     QAction *cleanAct{};
     QAction *resizeAct{};
-    QAction *setPenAct{};
+    QAction *paletteAct{};
+    QAction *penWidthAct{};
     QAction *insertAct{};
     QAction *lineAct{};
     QAction *fillAct{};
@@ -109,4 +111,5 @@ private:
     int clickCount = 0;
     enum Mode currentMode = MODE_LINE;
     int currentVerticesCount = 0;
+    QAction *lastCheckedColorAction;
 };

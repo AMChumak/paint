@@ -8,6 +8,7 @@
 #include <QMenuBar>
 #include <QResizeEvent>
 #include <QStyle>
+#include <QColorDialog>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -97,7 +98,7 @@ void MainWindow::resize()
     resizeWindow->show();
     connect(resizeWindow, &ResizeWindow::getNewSize, renderArea, &RenderArea::resizeImage);
 }
-void MainWindow::setPen() {}
+
 void MainWindow::insert()
 {
     insertAct->setChecked(true);
@@ -196,58 +197,73 @@ void MainWindow::insert8Star()
     currentMode = MODE_STAR;
     currentVerticesCount = 8;
 }
+
+void MainWindow::penWidth() {}
+
+void MainWindow::palette()
+{
+    paletteAct->setChecked(false);
+    lastCheckedColorAction->setChecked(true);
+    QColor color = QColorDialog::getColor();
+    if (color.isValid()) {
+        lastCheckedColorAction = paletteAct;
+        paletteAct->setChecked(true);
+        renderArea->setColor(color);
+    }
+}
+
 void MainWindow::setKcolor()
 {
-    setKcolorAct->setChecked(true);
+    lastCheckedColorAction = setKcolorAct;
     clickCount = 0;
     renderArea->loadLastScreen();
     renderArea->setColor(Qt::black);
 }
 void MainWindow::setRcolor()
 {
-    setRcolorAct->setChecked(true);
+    lastCheckedColorAction = setRcolorAct;
     clickCount = 0;
     renderArea->loadLastScreen();
     renderArea->setColor(Qt::red);
 }
 void MainWindow::setRGcolor()
 {
-    setRGcolorAct->setChecked(true);
+    lastCheckedColorAction = setRGcolorAct;
     clickCount = 0;
     renderArea->loadLastScreen();
     renderArea->setColor(Qt::yellow);
 }
 void MainWindow::setGcolor()
 {
-    setGcolorAct->setChecked(true);
+    lastCheckedColorAction = setGcolorAct;
     clickCount = 0;
     renderArea->loadLastScreen();
     renderArea->setColor(Qt::green);
 }
 void MainWindow::setGBcolor()
 {
-    setGBcolorAct->setChecked(true);
+    lastCheckedColorAction = setGBcolorAct;
     clickCount = 0;
     renderArea->loadLastScreen();
     renderArea->setColor(Qt::cyan);
 }
 void MainWindow::setBcolor()
 {
-    setBcolorAct->setChecked(true);
+    lastCheckedColorAction = setBcolorAct;
     clickCount = 0;
     renderArea->loadLastScreen();
     renderArea->setColor(Qt::blue);
 }
 void MainWindow::setBRcolor()
 {
-    setBRcolorAct->setChecked(true);
+    lastCheckedColorAction = setBRcolorAct;
     clickCount = 0;
     renderArea->loadLastScreen();
     renderArea->setColor(Qt::magenta);
 }
 void MainWindow::setWcolor()
 {
-    setWcolorAct->setChecked(true);
+    lastCheckedColorAction = setWcolorAct;
     clickCount = 0;
     renderArea->loadLastScreen();
     renderArea->setColor(Qt::white);
@@ -347,10 +363,16 @@ void MainWindow::createActions()
     resizeAct->setIcon(QIcon(":/resources/resize.png"));
     connect(resizeAct, SIGNAL(triggered()), this, SLOT(resize()));
 
-    setPenAct = new QAction("Set Pen", this);
-    setPenAct->setStatusTip("Set pen parameters");
-    setPenAct->setIcon(QIcon(":/resources/set_pen.png"));
-    connect(setPenAct, SIGNAL(triggered()), this, SLOT(setPen()));
+    paletteAct = new QAction("Palette", this);
+    paletteAct->setStatusTip("Choose color");
+    paletteAct->setIcon(QIcon(":/resources/palette.png"));
+    paletteAct->setCheckable(true);
+    connect(paletteAct, SIGNAL(triggered()), this, SLOT(palette()));
+
+    penWidthAct = new QAction("Width", this);
+    penWidthAct->setStatusTip("Set the pen width");
+    penWidthAct->setIcon(QIcon(":/resources/pen_width.png"));
+    connect(penWidthAct, SIGNAL(triggered()), this, SLOT(penWidth()));
 
     insertAct = new QAction("Insert", this);
     insertAct->setStatusTip("Insert a figure");
@@ -494,6 +516,7 @@ void MainWindow::createActions()
     connect(setWcolorAct, SIGNAL(triggered()), this, SLOT(setWcolor()));
 
     colorsGroup = new QActionGroup(this);
+    colorsGroup->addAction(paletteAct);
     colorsGroup->addAction(setKcolorAct);
     colorsGroup->addAction(setRcolorAct);
     colorsGroup->addAction(setRGcolorAct);
@@ -510,6 +533,7 @@ void MainWindow::createActions()
 
     //standard values
     setKcolorAct->setChecked(true);
+    lastCheckedColorAction = setKcolorAct;
     lineAct->setChecked(true);
 }
 void MainWindow::createMenus()
@@ -526,7 +550,9 @@ void MainWindow::createMenus()
     editMenu->addAction(redoAct);
     editMenu->addAction(cleanAct);
     editMenu->addAction(resizeAct);
-    editMenu->addAction(setPenAct);
+    editMenu->addAction(paletteAct);
+    editMenu->addAction(penWidthAct);
+    editMenu->addSeparator();
     editMenu->addAction(lineAct);
     editMenu->addAction(fillAct);
     editMenu->addAction(insertAct);
@@ -542,7 +568,6 @@ void MainWindow::createToolBar()
     mainToolBar->addAction(openAct);
     mainToolBar->addAction(saveAct);
     mainToolBar->addSeparator();
-    mainToolBar->addAction(setPenAct);
     mainToolBar->addAction(lineAct);
     mainToolBar->addAction(fillAct);
     mainToolBar->addAction(cleanAct);
@@ -558,6 +583,8 @@ void MainWindow::createToolBar()
     mainToolBar->addAction(insert7StarAct);
     mainToolBar->addAction(insert8StarAct);
     mainToolBar->addSeparator();
+    mainToolBar->addAction(penWidthAct);
+    mainToolBar->addAction(paletteAct);
     mainToolBar->addAction(setKcolorAct);
     mainToolBar->addAction(setWcolorAct);
     mainToolBar->addAction(setRcolorAct);

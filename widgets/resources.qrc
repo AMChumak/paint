@@ -7,6 +7,8 @@
         <file>resources/redo.png</file>
         <file>resources/clean.png</file>
         <file>resources/set_pen.png</file>
+        <file>resources/pen_width.png</file>
+        <file>resources/palette.png</file>
         <file>resources/line.png</file>
         <file>resources/fill.png</file>
         <file>resources/resize.png</file>
