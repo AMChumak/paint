@@ -2,13 +2,15 @@
 #include "ResizeWindow.h"
 #include <QAction>
 #include <QActionGroup>
+#include <QColorDialog>
 #include <QFileDialog>
 #include <QFrame>
 #include <QMenu>
 #include <QMenuBar>
 #include <QResizeEvent>
 #include <QStyle>
-#include <QColorDialog>
+
+#include "WidthWindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -198,7 +200,16 @@ void MainWindow::insert8Star()
     currentVerticesCount = 8;
 }
 
-void MainWindow::penWidth() {}
+void MainWindow::penWidth()
+{
+    WidthWindow *penWidthWindow = new WidthWindow(this, renderArea->getPenWidth());
+    QRect rect = geometry();
+    penWidthWindow->move(
+        rect.width() / 2 - penWidthWindow->width() / 2,
+        rect.height() / 2 - penWidthWindow->height() / 2);
+    penWidthWindow->show();
+    connect(penWidthWindow, &WidthWindow::widthChanged, renderArea, &RenderArea::setPenWidth);
+}
 
 void MainWindow::palette()
 {

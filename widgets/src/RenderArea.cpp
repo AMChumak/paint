@@ -27,6 +27,10 @@ QPoint RenderArea::getCurrentPressed() const
 {
     return mouse_points.back();
 }
+int RenderArea::getPenWidth() const
+{
+    return m_pen.width();
+}
 void RenderArea::mousePressEvent(QMouseEvent *event)
 {
     while (mouse_points.size() > mouse_points_limit - 1) {
@@ -74,9 +78,11 @@ void RenderArea::saveFile(const QString &fileName)
 void RenderArea::resizeImage(const QSize &size)
 {
     m_render = QImage(size.width(), size.height(), QImage::Format_ARGB32);
-    QPainter painter(&m_render);
+    QPainter painter{};
     m_render.fill(Qt::white);
+    painter.begin(&m_render);
     painter.drawImage(0, 0, m_screenshots[opened_step_index]);
+    painter.end();
     resize(m_render.width()+2, m_render.height()+2);
     make_screenshot();
     update();
@@ -165,7 +171,7 @@ void RenderArea::drawLine(const QPoint &begin, const QPoint &end)
     if (m_pen.width() == 1) { // Bresenham algorithm
         bresenhamAlgorithm(m_render, m_pen.color(), begin, end);
     } else {
-        QPainter painter(&m_render);
+        QPainter painter{};
         painter.begin(&m_render);
         painter.setPen(m_pen);
         painter.drawLine(begin.x(), begin.y(), end.x(), end.y());

@@ -16,6 +16,8 @@ public:
     QPoint getLastPressed() const;
     QPoint getCurrentPressed() const;
 
+    int getPenWidth() const;
+
 signals:
     void mousePressed(const QPoint &pos);
     void mouseMoved(const QPoint &pos);
