@@ -221,17 +221,19 @@ void RenderArea::fillArea(const QPoint &seed) //span algorithm
         QPoint right = stack.back();
         stack.pop_back();
         QPoint left = right + QPoint(-1, 0);
-        while (m_render.pixelColor(left) == inside_color) {
+        while (left.x() >= 0 && m_render.pixelColor(left) == inside_color) {
             m_render.setPixelColor(left, m_pen.color());
             left += QPoint(-1, 0);
         }
         left += QPoint(1, 0);
-        while (m_render.pixelColor(right) == inside_color) {
+        while (right.x() < m_render.width() && m_render.pixelColor(right) == inside_color) {
             m_render.setPixelColor(right, m_pen.color());
             right = right + QPoint(1, 0);
         }
-        scanSpan(m_render, inside_color, left + QPoint(0, 1), right + QPoint(0, 1), stack);
-        scanSpan(m_render, inside_color, left + QPoint(0, -1), right + QPoint(0, -1), stack);
+        if (left.y() + 1 < m_render.height())
+            scanSpan(m_render, inside_color, left + QPoint(0, 1), right + QPoint(0, 1), stack);
+        if (left.y() - 1 > 0)
+            scanSpan(m_render, inside_color, left + QPoint(0, -1), right + QPoint(0, -1), stack);
     }
     update();
 }
