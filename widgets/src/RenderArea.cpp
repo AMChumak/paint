@@ -47,6 +47,7 @@ void RenderArea::mouseMoveEvent(QMouseEvent *event)
 }
 void RenderArea::initFile()
 {
+    opened_step_index = 0;
     mouse_points.clear();
     m_screenshots.clear();
     for (int i = 0; i != mouse_points_limit; ++i) {
@@ -272,7 +273,7 @@ void RenderArea::fillArea(const QPoint &seed) //span algorithm
         }
         if (left.y() + 1 < m_render.height())
             scanSpan(m_render, inside_color, left + QPoint(0, 1), right + QPoint(0, 1), stack);
-        if (left.y() - 1 > 0)
+        if (left.y() - 1 >= 0)
             scanSpan(m_render, inside_color, left + QPoint(0, -1), right + QPoint(0, -1), stack);
     }
     update();
