@@ -10,6 +10,7 @@
 #include <QResizeEvent>
 #include <QStyle>
 
+#include "InsertWindow.h"
 #include "WidthWindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
@@ -91,7 +92,8 @@ void MainWindow::clean()
 }
 void MainWindow::resize()
 {
-    ResizeWindow *resizeWindow
+    clickCount = 0;
+    auto *resizeWindow
         = new ResizeWindow(this, QSize{renderArea->width() - 2, renderArea->height() - 2});
     QRect rect = geometry();
     resizeWindow->move(
@@ -103,10 +105,21 @@ void MainWindow::resize()
 
 void MainWindow::insert()
 {
-    insertAct->setChecked(true);
+    renderArea->loadLastScreen();
+    clickCount = 0;
+    insertAct->setChecked(false);
+    lastCheckedToolAction->setChecked(true);
+    auto *insertWindow = new InsertWindow(this, renderArea->width(), renderArea->height());
+    QRect rect = geometry();
+    insertWindow->move(
+        rect.width() / 2 - insertWindow->width() / 2,
+        rect.height() / 2 - insertWindow->height() / 2);
+    insertWindow->show();
+    connect(insertWindow, &InsertWindow::insertFigure, this, &MainWindow::onFigurePrepared);
 }
 void MainWindow::line()
 {
+    lastCheckedColorAction = lineAct;
     lineAct->setChecked(true);
     clickCount = 0;
     renderArea->loadLastScreen();
@@ -114,6 +127,7 @@ void MainWindow::line()
 }
 void MainWindow::fill()
 {
+    lastCheckedColorAction = fillAct;
     fillAct->setChecked(true);
     clickCount = 0;
     renderArea->loadLastScreen();
@@ -121,6 +135,7 @@ void MainWindow::fill()
 }
 void MainWindow::insert4Polygon()
 {
+    lastCheckedColorAction = insert4PolygonAct;
     insert4PolygonAct->setChecked(true);
     clickCount = 0;
     renderArea->loadLastScreen();
@@ -129,6 +144,7 @@ void MainWindow::insert4Polygon()
 }
 void MainWindow::insert5Polygon()
 {
+    lastCheckedColorAction = insert5PolygonAct;
     insert5PolygonAct->setChecked(true);
     clickCount = 0;
     renderArea->loadLastScreen();
@@ -137,6 +153,7 @@ void MainWindow::insert5Polygon()
 }
 void MainWindow::insert6Polygon()
 {
+    lastCheckedColorAction = insert6PolygonAct;
     insert6PolygonAct->setChecked(true);
     clickCount = 0;
     renderArea->loadLastScreen();
@@ -145,6 +162,7 @@ void MainWindow::insert6Polygon()
 }
 void MainWindow::insert7Polygon()
 {
+    lastCheckedColorAction = insert7PolygonAct;
     insert7PolygonAct->setChecked(true);
     clickCount = 0;
     renderArea->loadLastScreen();
@@ -153,6 +171,7 @@ void MainWindow::insert7Polygon()
 }
 void MainWindow::insert8Polygon()
 {
+    lastCheckedColorAction = insert8PolygonAct;
     insert8PolygonAct->setChecked(true);
     clickCount = 0;
     renderArea->loadLastScreen();
@@ -161,6 +180,7 @@ void MainWindow::insert8Polygon()
 }
 void MainWindow::insert4Star()
 {
+    lastCheckedColorAction = insert4StarAct;
     insert4StarAct->setChecked(true);
     clickCount = 0;
     renderArea->loadLastScreen();
@@ -169,6 +189,7 @@ void MainWindow::insert4Star()
 }
 void MainWindow::insert5Star()
 {
+    lastCheckedColorAction = insert5StarAct;
     insert5StarAct->setChecked(true);
     clickCount = 0;
     renderArea->loadLastScreen();
@@ -177,6 +198,7 @@ void MainWindow::insert5Star()
 }
 void MainWindow::insert6Star()
 {
+    lastCheckedColorAction = insert6StarAct;
     insert6StarAct->setChecked(true);
     clickCount = 0;
     renderArea->loadLastScreen();
@@ -185,6 +207,7 @@ void MainWindow::insert6Star()
 }
 void MainWindow::insert7Star()
 {
+    lastCheckedColorAction = insert7StarAct;
     insert7StarAct->setChecked(true);
     clickCount = 0;
     renderArea->loadLastScreen();
@@ -193,6 +216,7 @@ void MainWindow::insert7Star()
 }
 void MainWindow::insert8Star()
 {
+    lastCheckedColorAction = insert8StarAct;
     insert8StarAct->setChecked(true);
     clickCount = 0;
     renderArea->loadLastScreen();
@@ -293,6 +317,13 @@ void MainWindow::onCanvasPressed(const QPoint &point)
         }
         break;
     }
+    case MODE_FIGURE: {
+        if (clickCount == 1) {
+            renderArea->make_screenshot();
+            clickCount = 0;
+        }
+        break;
+    }
     default: {
         if (clickCount == 2) {
             renderArea->make_screenshot();
@@ -330,9 +361,30 @@ void MainWindow::onMouseMovedOverCanvas(const QPoint &point)
         }
         break;
     }
+    case MODE_FIGURE: {
+        if (clickCount == 0) {
+            QPoint center = point;
+            if (figureType == InsertWindow::FigureTypes_POLYGON) {
+                renderArea->drawPolygon(center, center + offset, currentVerticesCount);
+            } else if (figureType == InsertWindow::FigureTypes_STAR) {
+                renderArea->drawStar(center, center + offset, currentVerticesCount);
+            }
+        }
+        break;
+    }
     default:
         break;
     }
+}
+void MainWindow::onFigurePrepared(
+    const QPoint &offset, const int &countVerteces, InsertWindow::FigureTypes figureType)
+{
+    insertAct->setChecked(true);
+    lastCheckedColorAction = insertAct;
+    this->offset = offset;
+    currentVerticesCount = countVerteces;
+    this->figureType = figureType;
+    currentMode = MODE_FIGURE;
 }
 
 void MainWindow::createActions()
@@ -546,6 +598,7 @@ void MainWindow::createActions()
     setKcolorAct->setChecked(true);
     lastCheckedColorAction = setKcolorAct;
     lineAct->setChecked(true);
+    lastCheckedToolAction = lineAct;
 }
 void MainWindow::createMenus()
 {

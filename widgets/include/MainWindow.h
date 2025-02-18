@@ -3,6 +3,8 @@
 #include <QMainWindow>
 #include <QToolBar>
 #include <QVBoxLayout>
+
+#include "InsertWindow.h"
 #include "RenderArea.h"
 
 #if defined MAKE_UI_LIB
@@ -57,6 +59,7 @@ private slots:
 
     void onCanvasPressed(const QPoint &point);
     void onMouseMovedOverCanvas(const QPoint &point);
+    void onFigurePrepared(const QPoint &offset,const int &countVerteces, InsertWindow::FigureTypes figureType );
 
 private:
     void createActions();
@@ -64,7 +67,7 @@ private:
     void createToolBar();
 
 private:
-    enum Mode { MODE_LINE = 1, MODE_FILL = 2, MODE_POLYGON = 3, MODE_STAR = 4 };
+    enum Mode { MODE_LINE = 1, MODE_FILL = 2, MODE_POLYGON = 3, MODE_STAR = 4, MODE_FIGURE = 5,};
 
 private:
     QWidget *window;
@@ -112,4 +115,7 @@ private:
     enum Mode currentMode = MODE_LINE;
     int currentVerticesCount = 0;
     QAction *lastCheckedColorAction;
+    QAction *lastCheckedToolAction;
+    QPoint offset = QPoint(0, 0);
+    InsertWindow::FigureTypes figureType;
 };
